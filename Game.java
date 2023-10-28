@@ -1,3 +1,6 @@
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 /**
  *  This class is the main class of the "World of Zuul" application. 
  *  "World of Zuul" is a very simple, text based adventure game.  Users 
@@ -19,6 +22,9 @@ public class Game
 {
     private Parser parser;
     private Room currentRoom;
+    private Item isThereItem;
+    private Item currentItem;
+    private Room lastRoom;
         
     /**
      * Create the game and initialise its internal map.
@@ -34,7 +40,8 @@ public class Game
      */
     private void createRooms()
     {
-        Room entrance, checkIn, bubgerKirg, terminal, shop, security, toilet, womanToilet;
+        Room entrance, checkIn, bubgerKirg, terminal, shop, security, toilet, womanToilet, basement;
+
 
         entrance = new Room("At the entrance of the airport, just after the doorway, eerily empty");
         checkIn = new Room("An unmanned check-in room with metal detectors,scanning machines and luggage carts");
@@ -44,7 +51,9 @@ public class Game
         security = new Room ("A security room just like the ones you see in movies, 9 screens that each show footage from a cctv camera from somewhere on the airport");
         toilet = new Room ("A regular toilet with 3 stalls, some sinks and a big ass hole in the wall");
         womanToilet = new Room("A womans toilet booth, reeks of Wukong toplane and weed");
+        basement = new Room("The Basement below the Bubger Kirg, smells of rotten burgers");
 
+        basement.setExits("up", bubgerKirg);
         entrance.setExits("north", checkIn);
         entrance.setExits("east", security);
         checkIn.setExits("north", terminal);
@@ -52,6 +61,7 @@ public class Game
         checkIn.setExits("east", shop);
         checkIn.setExits("south", entrance);
         bubgerKirg.setExits("east", checkIn);
+        bubgerKirg.setExits("down", basement);
         terminal.setExits("south", checkIn);
         shop.setExits("west", checkIn);
         shop.setExits("north", security);
@@ -62,8 +72,17 @@ public class Game
         toilet.setExits("north", womanToilet);
         womanToilet.setExits("south", toilet);
 
-        // initialise room exits
 
+        Item borgar, hairline, secondborgar;
+        isThereItem = new Item("Placeholder Item", 0.0, null);
+        secondborgar = new Item("Dobbal cheeseborgar", 0.1, bubgerKirg);
+        borgar = new Item("A X-Long Chili Chicken borgar mhmmm tasty", 0.2, bubgerKirg);
+        hairline = new Item("An old wig, whoever used this must have had a crazy pushed back hairline", 0.01, security);
+        isThereItem.addToItemsList(borgar);
+        isThereItem.addToItemsList(hairline);
+        isThereItem.addToItemsList(secondborgar);
+
+        currentItem = null;
         currentRoom = entrance;  // start game outside
     }
 
@@ -91,15 +110,13 @@ public class Game
     private void printWelcome()
     {
         System.out.println();
-        System.out.println("Welcome to the World of Zuul!");
-        System.out.println("World of Zuul is a new, incredibly boring adventure game.");
+        System.out.println("Welcome to the Airport of the Cob!");
+        System.out.println("Airport of the Cob is a new hyper realistic text based adventure game");
+        System.out.println("Your objective is to find the ghost ¨Cob¨ who is hidden somewhere in the airport and exorcise him");
         System.out.println("Type 'help' if you need help.");
         System.out.println();
-        System.out.println("You are " + currentRoom.getDescription());
-        System.out.print("Exits: ");
-
         printLocationInfo();
-        System.out.println();
+
     }
 
     /**
@@ -123,8 +140,20 @@ public class Game
         else if (commandWord.equals("go")) {
             goRoom(command);
         }
+        else if(commandWord.equals("look"))
+        {
+            look();
+        }
+        else if(commandWord.equals("eat"))
+        {
+            eat();
+        }
         else if (commandWord.equals("quit")) {
             wantToQuit = quit(command);
+        }
+        else if (commandWord.equals("back"))
+        {
+            goBack();
         }
 
         return wantToQuit;
@@ -143,7 +172,12 @@ public class Game
         System.out.println("around at the university.");
         System.out.println();
         System.out.println("Your command words are:");
-        System.out.println("   go quit help");
+        System.out.println(parser.showCommands());
+    }
+
+    private void eat()
+    {
+        System.out.println("You have eaten and are not hungry anymore");
     }
 
     /** 
@@ -167,6 +201,7 @@ public class Game
             System.out.println("There is no door!");
         }
         else {
+            lastRoom = currentRoom;
             currentRoom = nextRoom;
 
             printLocationInfo();
@@ -189,33 +224,61 @@ public class Game
         }
     }
 
+    private void look()
+    {
+        System.out.println(currentRoom.getLongDescription());
+    }
+
+    private void goBack()
+    {
+    currentRoom = lastRoom;
+    printLocationInfo();
+    }
+
     public void printLocationInfo()
     {
-        System.out.println("You are " + currentRoom.getDescription());
-        System.out.println("Exits: ");
-        if(currentRoom.getExit("north") != null)
+
+        System.out.println(currentRoom.getLongDescription());
+        printItemInformation();
+        System.out.println(currentRoom.getExitInformation());
+    }
+
+    public Item doesRoomHaveItem()
+    {
+        for(Item item : isThereItem.getItemsList())
+        if(item.getBelongsTo() == currentRoom)
         {
-            System.out.println("North");
+            return item;
         }
+        return null;
+    }
 
-        if(currentRoom.getExit("east") != null)
+    public List<Item> getItemsInRoom()
+    {
+        List<Item> itemsInRoom = new ArrayList<>();
+        for(Item item : isThereItem.getItemsList())
         {
-            System.out.println("East");
+            if (item.getBelongsTo() == currentRoom)
+            {
+                itemsInRoom.add(item);
+            }
+
+
         }
+        return itemsInRoom;
+    }
 
-        if(currentRoom.getExit("south") != null)
+    public void printItemInformation()
+    {
+        List<Item> itemsInRoom = getItemsInRoom();
+        if (!itemsInRoom.isEmpty())
         {
-            System.out.println("South");
-        }
+            System.out.println("You also see the following items:");
 
-        if(currentRoom.getExit("west") != null)
-        {
-            System.out.println("west");
-        }
-
-        public String getExitString()
-        {
-
+            for (Item item : itemsInRoom)
+            {
+                System.out.println(item.getItemInfo());
+            }
         }
     }
 }

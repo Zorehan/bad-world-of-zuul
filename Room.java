@@ -13,14 +13,12 @@
  * @version 2011.07.31
  */
 import java.util.HashMap;
-public class Room 
+import java.util.Set;
+
+public class Room
 {
     private HashMap<String, Room> exits;
     public String description;
-    private Room northExit;
-    private Room southExit;
-    private Room eastExit;
-    private Room westExit;
 
     /**
      * Create a room described "description". Initially, it has
@@ -28,12 +26,23 @@ public class Room
      * "an open court yard".
      * @param description The room's description.
      */
-    public Room(String description) 
+    public Room(String description)
     {
         this.description = description;
         exits = new HashMap<String, Room>();
     }
 
+
+    public String getExitString()
+    {
+        String returnString = "Exits: ";
+        Set<String> keys = exits.keySet();
+        for(String exit : keys)
+        {
+            returnString += "  " + exit;
+        }
+        return returnString;
+    }
 
 
     public Room getExit(String direction)
@@ -53,4 +62,14 @@ public class Room
         return description;
     }
 
+    public String getLongDescription()
+    {
+        return "You are " + description;
+    }
+
+    public String getExitInformation()
+    {
+        return getExitString();
+    }
 }
+
