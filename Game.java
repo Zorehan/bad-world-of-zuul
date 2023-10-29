@@ -73,10 +73,10 @@ public class Game {
 
 
         Item borgar, hairline, secondborgar;
-        isThereItem = new Item("PlaceHolder Item", "Placeholder Item", 0.0, null);
-        secondborgar = new Item("CheeseBurger", "Dobbal cheeseborgar", 0.1, bubgerKirg);
-        borgar = new Item("ChickenBurger", "A X-Long Chili Chicken borgar mhmmm tasty", 0.2, bubgerKirg);
-        hairline = new Item("Wig", "An old wig, whoever used this must have had a crazy pushed back hairline", 0.01, security);
+        isThereItem = new Item("PlaceHolder Item", "Placeholder Item", 0.0, null, false);
+        secondborgar = new Item("CheeseBurger", "Dobbal cheeseborgar", 0.1, bubgerKirg, true);
+        borgar = new Item("ChickenBurger", "A X-Long Chili Chicken borgar mhmmm tasty", 0.2, bubgerKirg, true);
+        hairline = new Item("Wig", "An old wig, whoever used this must have had a crazy pushed back hairline", 0.01, security, false);
         isThereItem.addToItemsList(borgar);
         isThereItem.addToItemsList(hairline);
         isThereItem.addToItemsList(secondborgar);
@@ -138,13 +138,15 @@ public class Game {
         } else if (commandWord.equals("look")) {
             look();
         } else if (commandWord.equals("eat")) {
-            eat();
+            eat(command);
         } else if (commandWord.equals("quit")) {
             wantToQuit = quit(command);
         } else if (commandWord.equals("back")) {
             goBack();
         } else if (commandWord.equals("pickup")) {
             pickup(command);
+        } else if (commandWord.equals("eat")) {
+
         }
 
         return wantToQuit;
@@ -165,9 +167,26 @@ public class Game {
         System.out.println(parser.showCommands());
     }
 
-    private void eat() {
-        System.out.println("You have eaten and are not hungry anymore");
+    private void eat(Command command) {
+        if (!command.hasSecondWord()) {
+            System.out.println("Eat what?");
+            return;
+        }
+        String itemName = command.getSecondWord();
+        List<Item> itemsInInventory = player.getInventory();
+        Item itemToEat = null;
+
+        for (Item item : itemsInInventory) {
+            if (itemName.equals(item.getName()) && item.isItemEatable()) {
+                player.increaseCarryWeight();
+                item.removeItemsFromList(item);
+                System.out.println("You ate: " + item.getName() + " and increased your inventory capacity ");
+                break;
+            }
+        }
+
     }
+
 
     /**
      * Try to go in one direction. If there is an exit, enter
@@ -193,6 +212,7 @@ public class Game {
             printLocationInfo();
         }
     }
+
 
     private void pickup(Command command) {
         if (!command.hasSecondWord()) {
@@ -249,6 +269,7 @@ public class Game {
     player.setPlayerCurrentRoom(lastRoom);
     printLocationInfo();
     }
+
 
     public void printLocationInfo()
     {

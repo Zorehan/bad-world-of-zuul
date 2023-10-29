@@ -7,12 +7,19 @@ public class Item {
     private Room belongsTo;
     private List<Item> itemList = new ArrayList<>();
     private String name;
+    private boolean eatable;
 
-    public Item(String name, String itemDescription, double weight, Room belongsTo) {
+    public Item(String name, String itemDescription, double weight, Room belongsTo, boolean eatable) {
         this.itemDescription = itemDescription;
         this.weight = weight;
         this.belongsTo = belongsTo;
         this.name = name;
+        this.eatable = eatable;
+    }
+
+    public boolean isItemEatable()
+    {
+        return this.eatable;
     }
 
     public void setItemDescription(String newDescription) {
