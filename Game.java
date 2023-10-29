@@ -81,6 +81,10 @@ public class Game {
         isThereItem.addToItemsList(hairline);
         isThereItem.addToItemsList(secondborgar);
 
+        NPC gloms;
+        List<String> glomsTalkOptions = new ArrayList<>();
+        gloms = new NPC("Gloms", "Murloc looking ass Ginger", glomsTalkOptions, terminal);
+
         currentItem = null;
         currentRoom = entrance;  // start game outside
     }
