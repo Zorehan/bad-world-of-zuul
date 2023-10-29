@@ -18,28 +18,27 @@ import java.util.List;
  * @version 2011.07.31
  */
 
-public class Game 
-{
+public class Game {
     private Parser parser;
+    private Player player;
     private Room currentRoom;
     private Item isThereItem;
     private Item currentItem;
     private Room lastRoom;
-        
+
     /**
      * Create the game and initialise its internal map.
      */
-    public Game() 
-    {
+    public Game() {
         createRooms();
         parser = new Parser();
+        player = new Player(10, new ArrayList<>(), currentRoom, 0.0);
     }
 
     /**
      * Create all the rooms and link their exits together.
      */
-    private void createRooms()
-    {
+    private void createRooms() {
         Room entrance, checkIn, bubgerKirg, terminal, shop, security, toilet, womanToilet, basement;
 
 
@@ -48,8 +47,8 @@ public class Game
         bubgerKirg = new Room("A Bubger Kirg restaurant, lights are turned off, but you see small lights flashing from food storage units");
         terminal = new Room("Endless gates as far as the eyes can see, however all of them seem locked down");
         shop = new Room("A shop with infinite amounts of random stuff, from toys to cheap polish cigarettes, all yours for the taking");
-        security = new Room ("A security room just like the ones you see in movies, 9 screens that each show footage from a cctv camera from somewhere on the airport");
-        toilet = new Room ("A regular toilet with 3 stalls, some sinks and a big ass hole in the wall");
+        security = new Room("A security room just like the ones you see in movies, 9 screens that each show footage from a cctv camera from somewhere on the airport");
+        toilet = new Room("A regular toilet with 3 stalls, some sinks and a big ass hole in the wall");
         womanToilet = new Room("A womans toilet booth, reeks of Wukong toplane and weed");
         basement = new Room("The Basement below the Bubger Kirg, smells of rotten burgers");
 
@@ -74,10 +73,10 @@ public class Game
 
 
         Item borgar, hairline, secondborgar;
-        isThereItem = new Item("Placeholder Item", 0.0, null);
-        secondborgar = new Item("Dobbal cheeseborgar", 0.1, bubgerKirg);
-        borgar = new Item("A X-Long Chili Chicken borgar mhmmm tasty", 0.2, bubgerKirg);
-        hairline = new Item("An old wig, whoever used this must have had a crazy pushed back hairline", 0.01, security);
+        isThereItem = new Item("PlaceHolder Item", "Placeholder Item", 0.0, null);
+        secondborgar = new Item("CheeseBurger", "Dobbal cheeseborgar", 0.1, bubgerKirg);
+        borgar = new Item("ChickenBurger", "A X-Long Chili Chicken borgar mhmmm tasty", 0.2, bubgerKirg);
+        hairline = new Item("Wig", "An old wig, whoever used this must have had a crazy pushed back hairline", 0.01, security);
         isThereItem.addToItemsList(borgar);
         isThereItem.addToItemsList(hairline);
         isThereItem.addToItemsList(secondborgar);
@@ -87,17 +86,16 @@ public class Game
     }
 
     /**
-     *  Main play routine.  Loops until end of play.
+     * Main play routine.  Loops until end of play.
      */
-    public void play() 
-    {            
+    public void play() {
         printWelcome();
 
         // Enter the main command loop.  Here we repeatedly read commands and
         // execute them until the game is over.
-                
+
         boolean finished = false;
-        while (! finished) {
+        while (!finished) {
             Command command = parser.getCommand();
             finished = processCommand(command);
         }
@@ -107,8 +105,7 @@ public class Game
     /**
      * Print out the opening message for the player.
      */
-    private void printWelcome()
-    {
+    private void printWelcome() {
         System.out.println();
         System.out.println("Welcome to the Airport of the Cob!");
         System.out.println("Airport of the Cob is a new hyper realistic text based adventure game");
@@ -121,14 +118,14 @@ public class Game
 
     /**
      * Given a command, process (that is: execute) the command.
+     *
      * @param command The command to be processed.
      * @return true If the command ends the game, false otherwise.
      */
-    private boolean processCommand(Command command) 
-    {
+    private boolean processCommand(Command command) {
         boolean wantToQuit = false;
 
-        if(command.isUnknown()) {
+        if (command.isUnknown()) {
             System.out.println("I don't know what you mean...");
             return false;
         }
@@ -136,24 +133,18 @@ public class Game
         String commandWord = command.getCommandWord();
         if (commandWord.equals("help")) {
             printHelp();
-        }
-        else if (commandWord.equals("go")) {
+        } else if (commandWord.equals("go")) {
             goRoom(command);
-        }
-        else if(commandWord.equals("look"))
-        {
+        } else if (commandWord.equals("look")) {
             look();
-        }
-        else if(commandWord.equals("eat"))
-        {
+        } else if (commandWord.equals("eat")) {
             eat();
-        }
-        else if (commandWord.equals("quit")) {
+        } else if (commandWord.equals("quit")) {
             wantToQuit = quit(command);
-        }
-        else if (commandWord.equals("back"))
-        {
+        } else if (commandWord.equals("back")) {
             goBack();
+        } else if (commandWord.equals("pickup")) {
+            pickup(command);
         }
 
         return wantToQuit;
@@ -163,11 +154,10 @@ public class Game
 
     /**
      * Print out some help information.
-     * Here we print some stupid, cryptic message and a list of the 
+     * Here we print some stupid, cryptic message and a list of the
      * command words.
      */
-    private void printHelp() 
-    {
+    private void printHelp() {
         System.out.println("You are lost. You are alone. You wander");
         System.out.println("around at the university.");
         System.out.println();
@@ -175,18 +165,16 @@ public class Game
         System.out.println(parser.showCommands());
     }
 
-    private void eat()
-    {
+    private void eat() {
         System.out.println("You have eaten and are not hungry anymore");
     }
 
-    /** 
+    /**
      * Try to go in one direction. If there is an exit, enter
      * the new room, otherwise print an error message.
      */
-    private void goRoom(Command command) 
-    {
-        if(!command.hasSecondWord()) {
+    private void goRoom(Command command) {
+        if (!command.hasSecondWord()) {
             // if there is no second word, we don't know where to go...
             System.out.println("Go where?");
             return;
@@ -195,16 +183,42 @@ public class Game
         String direction = command.getSecondWord();
 
         // Try to leave current room.
-        Room nextRoom = currentRoom.getExit(direction);
+        Room nextRoom = player.getPlayerCurrentRoom().getExit(direction);
 
         if (nextRoom == null) {
             System.out.println("There is no door!");
-        }
-        else {
-            lastRoom = currentRoom;
-            currentRoom = nextRoom;
-
+        } else {
+            lastRoom = player.getPlayerCurrentRoom();
+            player.setPlayerCurrentRoom(nextRoom);
             printLocationInfo();
+        }
+    }
+
+    private void pickup(Command command) {
+        if (!command.hasSecondWord()) {
+            System.out.println("Pick up what?");
+            return;
+        }
+
+        String itemName = command.getSecondWord();
+        List<Item> itemsInRoom = isThereItem.getItemsList();
+        Item itemToPickUp = null;
+
+        for (Item item : itemsInRoom) {
+            if (itemName.equals(item.getName())) {
+                itemToPickUp = item;
+                break;
+            }
+
+        }
+
+        if (itemToPickUp != null) {
+            player.addToInventory(itemToPickUp);
+            itemsInRoom.remove(itemToPickUp);
+        }
+
+        else {
+            System.out.println("that item is not here");
         }
     }
 
@@ -226,21 +240,22 @@ public class Game
 
     private void look()
     {
-        System.out.println(currentRoom.getLongDescription());
+        System.out.println(player.getPlayerCurrentRoom().getLongDescription());
+        printItemInformation();
     }
 
     private void goBack()
     {
-    currentRoom = lastRoom;
+    player.setPlayerCurrentRoom(lastRoom);
     printLocationInfo();
     }
 
     public void printLocationInfo()
     {
 
-        System.out.println(currentRoom.getLongDescription());
+        System.out.println(player.getPlayerCurrentRoom().getLongDescription());
         printItemInformation();
-        System.out.println(currentRoom.getExitInformation());
+        System.out.println(player.getPlayerCurrentRoom().getExitInformation());
     }
 
     public Item doesRoomHaveItem()
@@ -258,7 +273,7 @@ public class Game
         List<Item> itemsInRoom = new ArrayList<>();
         for(Item item : isThereItem.getItemsList())
         {
-            if (item.getBelongsTo() == currentRoom)
+            if (item.getBelongsTo() == player.getPlayerCurrentRoom())
             {
                 itemsInRoom.add(item);
             }

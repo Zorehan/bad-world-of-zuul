@@ -6,34 +6,49 @@ public class Item {
     private double weight;
     private Room belongsTo;
     private List<Item> itemList = new ArrayList<>();
-    public Item(String itemDescription, double weight, Room belongsTo) {
+    private String name;
+
+    public Item(String name, String itemDescription, double weight, Room belongsTo) {
         this.itemDescription = itemDescription;
         this.weight = weight;
         this.belongsTo = belongsTo;
+        this.name = name;
     }
 
-    public void setItemDescription(String newDescription)
-
-    {
+    public void setItemDescription(String newDescription) {
         this.itemDescription = newDescription;
     }
 
-    public List<Item> getItemsList()
-    {
+    public List<Item> getItemsList() {
         return this.itemList;
     }
 
-    public void addToItemsList(Item item)
-    {
+    public void addToItemsList(Item item) {
         itemList.add(item);
     }
-    public Room getBelongsTo()
+
+    public void removeItemsFromList(Item item)
     {
+        itemList.remove(item);
+    }
+
+    public Room getBelongsTo() {
         return this.belongsTo;
     }
-    public String getItemInfo()
+
+    public String getItemInfo() {
+        return this.name + ".\n" + this.itemDescription + ".\n" + " Weight: " + this.weight + "kg";
+    }
+
+
+    public double getWeight()
     {
-        return this.itemDescription + ".\n" + " Weight: " + this.weight + "kg";
+        return this.weight;
+    }
+
+    public String getName()
+    {
+        return this.name;
     }
 
 }
